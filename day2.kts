@@ -1,5 +1,5 @@
 package alberda.aoc2018
-import java.io.File;
+import java.io.File
 
 var boxIds = File("day2.txt").readLines()
 

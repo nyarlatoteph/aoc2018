@@ -1,5 +1,5 @@
 package alberda.aoc2018
-import java.io.File;
+import java.io.File
 
 var content = File("day1.txt").readLines()
 println(content.fold(0, { result: Int, line: String ->
