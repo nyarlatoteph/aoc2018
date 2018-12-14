@@ -1,0 +1,8 @@
+name:
+  AoC2018
+version:
+  0.0.1
+description:
+  Advent of Code 2018
+dependencies:
+  collection: ^1.14.11

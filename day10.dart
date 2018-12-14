@@ -9,6 +9,7 @@ class Position {
     return "($x, $y)";
   }
 }
+
 class Signal {
   Position position;
   int vx, vy;

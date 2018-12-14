@@ -1,5 +1,3 @@
-import 'dart:io';
-
 int marble_game(int players, int last_marble) {
   List<int> _marbles = List();
   List<int> _scores = List(players);
@@ -19,10 +17,10 @@ int marble_game(int players, int last_marble) {
 
   var new_position = 0;
   for (int _marble = 0; _marble < last_marble; _marble++) {
+    print(_marble);
     if (_marble > 0 && _marble % 23 == 0) {
       new_position = counter_clockwise_index(_current_position, 7);
-      _scores[_current_player] += _marble + _marbles[new_position];
-      _marbles.removeAt(new_position);
+      _scores[_current_player] += _marble + _marbles.removeAt(new_position);
       new_position = new_position % _marbles.length;
     } else {
       new_position = clockwise_index(_current_position, 2);
@@ -48,6 +46,6 @@ main() {
   assert(marble_game(21, 6111) == 54718);
   assert(marble_game(30, 5807) == 37305);
 
-  print(marble_game(465, 71940));
-  print(marble_game(465, 7194000));
+  print("part a: ${marble_game(465, 71940)}");
+  print("part b: ${marble_game(465, 7194000)}");
 }
