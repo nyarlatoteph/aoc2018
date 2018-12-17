@@ -37,7 +37,7 @@ main() async {
   }
 
   var generations = 20;
-  generations = 50000000000;
+//  generations = 50000000000;
 
   var content = await File('day12.txt').readAsLines();
 //  content = await File('test.txt').readAsLines();
