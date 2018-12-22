@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:math';
 
 List<int> next_generation(List<int> state, List<int> changes) {
 
@@ -25,6 +26,15 @@ List<int> next_generation(List<int> state, List<int> changes) {
   return result;
 }
 
+print_state(int n, List<int> state) {
+  stdout.write("$n:");
+  var m = state.reduce(max);
+  for (int n = 0; n < m; n++) {
+    stdout.write(state.contains(n) ? "#" : '.');
+  }
+  print('');
+}
+
 main() async {
   int value(String s) {
     var v = 0;
@@ -36,7 +46,7 @@ main() async {
     return v;
   }
 
-  var generations = 20;
+  var generations = 135;
 //  generations = 50000000000;
 
   var content = await File('day12.txt').readAsLines();
@@ -61,10 +71,11 @@ main() async {
   });
 
   for (var n = 0; n < generations; n++) {
+    print_state(n, state);
     state.sort();
     state = next_generation(state, changes);
-    print(n);
   }
 
+  state = state.map((p) => p + 50000000000 - generations).toList();
   print(state.reduce((a, b) => a + b));
 }
