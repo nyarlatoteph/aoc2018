@@ -6,3 +6,5 @@ description:
   Advent of Code 2018
 dependencies:
   collection: ^1.14.11
+  tuple: ^1.0.2
+
