@@ -1,6 +1,6 @@
 import 'dart:io';
 
-class Point extends Object {
+class Point {
   int x;
   int y;
   Point(this.x, this.y);
@@ -19,47 +19,73 @@ class Point extends Object {
   }
 }
 
-Point new_position(Point position, Point speed) {
-  var nx = position.x + speed.x;
-  var ny = position.y + speed.y;
-  return Point(nx, ny);
+class Cart {
+  Point position;
+  Point speed;
+  int turn;
+
+  Cart(this.position, this.speed, this.turn);
+
+  Point new_position(Point position, Point speed) {
+    var nx = position.x + speed.x;
+    var ny = position.y + speed.y;
+    return Point(nx, ny);
+  }
+
+  advance() {
+    this.position = new_position(position, speed);
+  }
+
+  @override
+  int get hashCode => position.hashCode;
+
+  @override
+  bool operator ==(other) {
+    return other is Cart && position == other.position;
+  }
+
+  @override
+  String toString() {
+    return "Cart $position $speed $turn";
+  }
 }
 
-bool advance(tracks, List<Point> carts, List<Point> speeds, List<int> turns) {
+
+bool advance(tracks, List<Cart> carts) {
   for (var n = 0; n < carts.length; n++) {
-    var c = tracks[carts[n].y][carts[n].x];
+    var c = tracks[carts[n].position.y][carts[n].position.x];
     if (c == '/') {
-      speeds[n] = Point(-speeds[n].y, -speeds[n].x);
+      carts[n].speed = Point(-carts[n].speed.y, -carts[n].speed.x);
     } else if (c == '\\') {
-      speeds[n] = Point(speeds[n].y, speeds[n].x);
+      carts[n].speed = Point(carts[n].speed.y, carts[n].speed.x);
     } else if (c == '+') {
-      if (turns[n] == 0) {
-        speeds[n] = Point(speeds[n].y, -speeds[n].x);
-      } else if (turns[n] == 2) {
-        speeds[n] = Point(-speeds[n].y, speeds[n].x);
+      if (carts[n].turn == 0) {
+        carts[n].speed = Point(carts[n].speed.y, -carts[n].speed.x);
+      } else if (carts[n].turn == 2) {
+        carts[n].speed = Point(-carts[n].speed.y, carts[n].speed.x);
       }
-      turns[n] = (turns[n] + 1) % 3;
+      carts[n].turn = (carts[n].turn + 1) % 3;
     }
-    carts[n] = new_position(carts[n], speeds[n]);
+    carts[n].advance();
   }
   return carts.toSet().length != carts.length;
 }
 
 
-print_tracks(tracks, List<Point> carts, List<Point> speeds) {
+print_tracks(tracks, List<Cart> carts) {
   List<String> t = List<String>.from(tracks);
   for (var n = 0; n < carts.length; n++) {
     var c = 'o';
-    if (speeds[n].x > 0) {
+    if (carts[n].speed.x > 0) {
       c = ">";
-    } else if (speeds[n].x < 0) {
+    } else if (carts[n].speed.x < 0) {
       c = "<";
-    } else if (speeds[n].y > 0) {
+    } else if (carts[n].speed.y > 0) {
       c = "v";
-    } else if (speeds[n].y < 0) {
+    } else if (carts[n].speed.y < 0) {
       c = "^";
     }
-    t[carts[n].y] = t[carts[n].y].replaceRange(carts[n].x, carts[n].x+1, c);
+    t[carts[n].position.y] = t[carts[n].position.y].replaceRange(carts[n].position.x, carts[n].position.x+1, c);
   }
   for (int y = 0; y < t.length; y++) {
     print(t[y]);
@@ -70,49 +96,47 @@ print_tracks(tracks, List<Point> carts, List<Point> speeds) {
 main() async {
   var tracks = await File('day13.txt').readAsLines();
 //  tracks = await File('test.txt').readAsLines();
-  var carts = List<Point>();
-  var speeds = List<Point>();
-  var turns = List<int>();
+  var carts = List<Cart>();
 
   for (int y = 0; y < tracks.length; y++) {
     for (int x = 0; x < tracks[y].length; x++) {
       var c = tracks[y][x];
       switch(c) {
         case "<":
-          carts.add(Point(x, y));
-          speeds.add(Point(-1, 0));
-          turns.add(0);
+          carts.add(Cart(Point(x, y), Point(-1, 0), 0));
           tracks[y] = tracks[y].replaceRange(x, x+1, '-');
           break;
         case ">":
-          carts.add(Point(x, y));
-          speeds.add(Point(1, 0));
-          turns.add(0);
+          carts.add(Cart(Point(x, y), Point(1, 0), 0));
           tracks[y] = tracks[y].replaceRange(x, x+1, '-');
           break;
         case "v":
-          carts.add(Point(x, y));
-          speeds.add(Point(0, 1));
-          turns.add(0);
+          carts.add(Cart(Point(x, y), Point(0, 1), 0));
           tracks[y] = tracks[y].replaceRange(x, x+1, '|');
           break;
         case "^":
-          carts.add(Point(x, y));
-          speeds.add(Point(0, -1));
-          turns.add(0);
+          carts.add(Cart(Point(x, y), Point(0, -1), 0));
           tracks[y] = tracks[y].replaceRange(x, x+1, '|');
           break;
       }
     }
   }
 
-  var t = 0;
-  bool collision = false;
-  while (!collision) {
-    collision = advance(tracks, carts, speeds, turns);
-    t += 1;
-    print_tracks(tracks, carts, speeds);
+  print_tracks(tracks, carts);
+  print(carts.length);
+  while (carts.length > 1) {
+    advance(tracks, carts);
+//    print_tracks(tracks, carts);
+    var collisions = List<Cart>.from(carts);
+    collisions.sort((p1, p2) => p1.position.x.compareTo(p2.position.x));
+    for (var n = 0; n < collisions.length-1; n++) {
+      if (collisions[n] == collisions[n+1]) {
+        collisions.removeAt(n);
+        collisions.removeAt(n);
+        print(collisions.length);
+      }
+    }
+    carts = collisions;
   }
-  carts.sort((p1, p2) => p1.x.compareTo(p2.x));
   print(carts);
 }
